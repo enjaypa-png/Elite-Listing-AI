@@ -4,7 +4,7 @@
 
 1. Add your OpenAI API key to `.env.local`:
 ```bash
-OPENAI_API_KEY="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"
+OPENAI_API_KEY="your open ai key here"
 ```
 
 2. Restart the dev server:
