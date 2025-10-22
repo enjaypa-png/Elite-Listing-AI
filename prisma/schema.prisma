@@ -69,7 +69,7 @@ model Listing {
 
 model Optimization {
   id                String   @id @default(cuid())
-  listingId         String
+  listingId         String?  // Optional - can be null for standalone optimizations
   userId            String
   type              String   // "title", "description", "full", "photos"
   status            String   @default("pending") // pending, processing, completed, failed
@@ -83,7 +83,7 @@ model Optimization {
   updatedAt         DateTime @updatedAt
   completedAt       DateTime?
   
-  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing           Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   variants          OptimizationVariant[]
   
   @@map("optimizations")

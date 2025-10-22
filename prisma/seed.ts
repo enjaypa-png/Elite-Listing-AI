@@ -5,7 +5,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed...');
 
-  // Create a demo user
+  // Create demo users for testing
+  const demoUser = await prisma.user.upsert({
+    where: { id: 'demo-user-123' },
+    update: {},
+    create: {
+      id: 'demo-user-123',
+      email: 'demo@elitelistingai.com',
+      name: 'Demo User',
+      emailVerified: new Date(),
+    },
+  });
+
   const user = await prisma.user.upsert({
     where: { email: 'demo@elitelistingai.com' },
     update: {},
@@ -16,7 +27,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Created user:', user.email);
+  console.log('✅ Created users:', demoUser.email, user.email);
 
   // Create a demo shop
   const shop = await prisma.shop.upsert({
@@ -83,7 +94,7 @@ async function main() {
 
   console.log('✅ Created', listings.length, 'listings');
 
-  // Initialize credit ledger with starting credits
+  // Initialize credit ledger with starting credits for both users
   const creditLedger = await prisma.creditLedger.create({
     data: {
       userId: user.id,
@@ -94,7 +105,18 @@ async function main() {
     },
   });
 
-  console.log('✅ Created credit ledger with balance:', creditLedger.balance);
+  // Add credits for demo user as well
+  const demoCreditLedger = await prisma.creditLedger.create({
+    data: {
+      userId: demoUser.id,
+      amount: 100,
+      balance: 100,
+      type: 'bonus',
+      description: 'Demo user welcome bonus credits',
+    },
+  });
+
+  console.log('✅ Created credit ledgers - User balance:', creditLedger.balance, 'Demo user balance:', demoCreditLedger.balance);
 
   // Create a sample optimization
   const optimization = await prisma.optimization.create({
