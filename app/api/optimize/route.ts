@@ -109,9 +109,9 @@ Photo Quality Score: ${photoScore}/100
 Generate 3 optimized variants that will maximize conversions and search visibility.`;
 
     // Call OpenAI API
-    console.log(`[${requestId}] Calling OpenAI API with model gpt-40...`);
+    console.log(`[${requestId}] Calling OpenAI API with model gpt-4o...`);
     const completion = await client.chat.completions.create({
-      model: 'gpt-40',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -166,6 +166,7 @@ Generate 3 optimized variants that will maximize conversions and search visibili
     // Save optimization results to database
     let optimizationId: string | null = null;
     
+    /* Temporarily disabled - database not set up yet
     try {
       // 1. Find or create demo user
       let demoUser = await prisma.user.findUnique({
@@ -192,7 +193,7 @@ Generate 3 optimized variants that will maximize conversions and search visibili
           type: 'full',
           status: 'completed',
           creditsUsed: 10,
-          aiModel: 'gpt-40',
+          aiModel: 'gpt-4o',
           completedAt: new Date(),
           result: {
             healthScore,
@@ -229,6 +230,7 @@ Generate 3 optimized variants that will maximize conversions and search visibili
       console.error(`[${requestId}] Database save failed:`, dbError);
       optimizationId = null;
     }
+    */
 
     // Return optimized response with optimizationId in metadata if saved successfully
     const response: any = {
@@ -238,7 +240,7 @@ Generate 3 optimized variants that will maximize conversions and search visibili
       healthScore,
       rationale,
       metadata: {
-        model: 'gpt-40',
+        model: 'gpt-4o',
         platform,
         originalTitle: title,
         photoScore,
