@@ -107,40 +107,44 @@ export default function TestOptimize() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-semibold mb-3 text-gray-900 tracking-tight">
+          <h1 className="text-5xl font-bold mb-3 text-gray-900">
             Elite Listing AI
           </h1>
-          <p className="text-lg text-gray-500">Optimize your Etsy listings with AI</p>
+          <p className="text-gray-600">Optimize your Etsy listings with AI</p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-10 justify-center bg-gray-100 rounded-xl p-1 max-w-md mx-auto">
-          <button
-            onClick={() => setActiveTab('optimize')}
-            className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'optimize'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Listing Optimizer
-          </button>
-          <button
-            onClick={() => setActiveTab('image')}
-            className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
-              activeTab === 'image'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Image Analysis
-          </button>
+        {/* Tab Switcher */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-gray-100 rounded-2xl p-1">
+            <button
+              onClick={() => setActiveTab('optimize')}
+              className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'optimize'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📝 Listing Optimizer
+            </button>
+            <button
+              onClick={() => setActiveTab('image')}
+              className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'image'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              🖼️ Image Analysis
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Panel - Input Form */}
           <div className="bg-gray-50 rounded-3xl p-8">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">
@@ -186,7 +190,7 @@ export default function TestOptimize() {
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your product..."
+                    placeholder="Beautiful handcrafted ceramic coffee mug..."
                     rows={4}
                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-gray-900 placeholder-gray-400"
                   />
@@ -389,53 +393,173 @@ export default function TestOptimize() {
 
                 {imageResponse && imageResponse.ok && (
                   <div className="space-y-5">
-                    <div className="bg-white rounded-2xl p-5 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-base font-medium text-gray-700">Overall Quality Score</span>
-                        <span className={`text-3xl font-semibold ${getScoreColor(imageResponse.score)}`}>
+                    {/* Weighted Image Optimization Index */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-sm border border-blue-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-700">Weighted Image Optimization Index</span>
+                        <span className="text-xs text-gray-500">Overall Score</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className={`text-5xl font-bold ${getScoreColor(imageResponse.score)}`}>
                           {imageResponse.score}
                         </span>
+                        <div className="flex-1">
+                          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${getScoreBgColor(imageResponse.score)} transition-all duration-500`}
+                              style={{ width: `${imageResponse.score}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-600 mt-2">
+                            {imageResponse.score >= 90 ? 'Excellent - Optimized for maximum visibility' :
+                             imageResponse.score >= 80 ? 'Good - Minor improvements needed' :
+                             imageResponse.score >= 70 ? 'Fair - Several optimization opportunities' :
+                             imageResponse.score >= 60 ? 'Poor - Significant issues affecting performance' :
+                             'Critical - Major compliance and quality issues'}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      {[
-                        { label: 'Lighting', score: imageResponse.lighting },
-                        { label: 'Composition', score: imageResponse.composition },
-                        { label: 'Clarity', score: imageResponse.clarity },
-                        { label: 'Appeal', score: imageResponse.appeal },
-                      ].map((metric, index) => (
-                        <div key={index} className="bg-white rounded-2xl p-4 shadow-sm">
-                          <p className="text-xs font-medium text-gray-500 mb-2">{metric.label}</p>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                              <div
-                                className={`h-1.5 rounded-full ${getScoreBgColor(metric.score)}`}
-                                style={{ width: `${metric.score}%` }}
-                              />
+                    {/* Core Quality Metrics */}
+                    <div className="bg-white rounded-2xl p-5 shadow-sm">
+                      <h3 className="font-semibold text-base mb-4 text-gray-900">Core Quality Metrics</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { label: 'Lighting', score: imageResponse.lighting },
+                          { label: 'Composition', score: imageResponse.composition },
+                          { label: 'Clarity', score: imageResponse.clarity },
+                          { label: 'Appeal', score: imageResponse.appeal },
+                        ].map((metric, index) => (
+                          <div key={index} className="bg-gray-50 rounded-xl p-3">
+                            <p className="text-xs font-medium text-gray-500 mb-2">{metric.label}</p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                                <div
+                                  className={`h-1.5 rounded-full ${getScoreBgColor(metric.score)}`}
+                                  style={{ width: `${metric.score}%` }}
+                                />
+                              </div>
+                              <span className={`text-sm font-semibold ${getScoreColor(metric.score)}`}>
+                                {metric.score}
+                              </span>
                             </div>
-                            <span className={`text-sm font-semibold ${getScoreColor(metric.score)}`}>
-                              {metric.score}
-                            </span>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
 
-                    {imageResponse.feedback && (
+                    {/* Enhanced Metrics */}
+                    {(imageResponse.technicalCompliance || imageResponse.algorithmFit || imageResponse.productDominance) && (
                       <div className="bg-white rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-base mb-2 text-gray-900">Feedback</h3>
-                        <p className="text-sm text-gray-700">{imageResponse.feedback}</p>
+                        <h3 className="font-semibold text-base mb-4 text-gray-900">Advanced Analysis</h3>
+                        <div className="space-y-3">
+                          {imageResponse.technicalCompliance !== undefined && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <span className="text-sm text-gray-700">Technical Compliance (40%)</span>
+                              <span className={`font-semibold ${getScoreColor(imageResponse.technicalCompliance)}`}>
+                                {imageResponse.technicalCompliance}
+                              </span>
+                            </div>
+                          )}
+                          {imageResponse.algorithmFit !== undefined && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <span className="text-sm text-gray-700">Algorithm Fit (30%)</span>
+                              <span className={`font-semibold ${getScoreColor(imageResponse.algorithmFit)}`}>
+                                {imageResponse.algorithmFit}
+                              </span>
+                            </div>
+                          )}
+                          {imageResponse.productDominance !== undefined && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <span className="text-sm text-gray-700">Product Dominance</span>
+                              <span className={`font-semibold ${getScoreColor(imageResponse.productDominance)}`}>
+                                {imageResponse.productDominance}%
+                              </span>
+                            </div>
+                          )}
+                          {imageResponse.backgroundQuality !== undefined && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <span className="text-sm text-gray-700">Background Quality</span>
+                              <span className={`font-semibold ${getScoreColor(imageResponse.backgroundQuality)}`}>
+                                {imageResponse.backgroundQuality}
+                              </span>
+                            </div>
+                          )}
+                          {imageResponse.colorBalance !== undefined && (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <span className="text-sm text-gray-700">Color Balance</span>
+                              <span className={`font-semibold ${getScoreColor(imageResponse.colorBalance)}`}>
+                                {imageResponse.colorBalance}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
-                    {imageResponse.suggestions && imageResponse.suggestions.length > 0 && (
+                    {/* Technical Details */}
+                    {(imageResponse.estimatedResolution || imageResponse.aspectRatioEstimate) && (
                       <div className="bg-white rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-base mb-3 text-gray-900">Suggestions</h3>
+                        <h3 className="font-semibold text-base mb-3 text-gray-900">Technical Details</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {imageResponse.estimatedResolution && (
+                            <div className="p-3 bg-gray-50 rounded-xl">
+                              <p className="text-xs text-gray-500 mb-1">Estimated Resolution</p>
+                              <p className="text-sm font-medium text-gray-900">{imageResponse.estimatedResolution}</p>
+                            </div>
+                          )}
+                          {imageResponse.aspectRatioEstimate && (
+                            <div className="p-3 bg-gray-50 rounded-xl">
+                              <p className="text-xs text-gray-500 mb-1">Aspect Ratio</p>
+                              <p className="text-sm font-medium text-gray-900">{imageResponse.aspectRatioEstimate}</p>
+                            </div>
+                          )}
+                        </div>
+                        {imageResponse.platformRequirements && (
+                          <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                            <p className="text-xs font-medium text-blue-900 mb-2">Platform Requirements ({imagePlatform})</p>
+                            <div className="text-xs text-blue-800 space-y-1">
+                              <p>• Min Resolution: {imageResponse.platformRequirements.minResolution}px</p>
+                              <p>• Preferred Aspect: {imageResponse.platformRequirements.preferredAspectRatio}</p>
+                              <p>• Product Dominance: ≥{imageResponse.platformRequirements.minProductDominance}%</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Compliance Issues */}
+                    {imageResponse.complianceIssues && imageResponse.complianceIssues.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-sm">
+                        <h3 className="font-semibold text-base mb-3 text-red-900">⚠️ Compliance Issues</h3>
+                        <ul className="space-y-2">
+                          {imageResponse.complianceIssues.map((issue: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2 text-sm text-red-800">
+                              <span className="text-red-500 mt-0.5">•</span>
+                              <span>{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Feedback */}
+                    {imageResponse.feedback && (
+                      <div className="bg-white rounded-2xl p-5 shadow-sm">
+                        <h3 className="font-semibold text-base mb-2 text-gray-900">Detailed Feedback</h3>
+                        <p className="text-sm text-gray-700 leading-relaxed">{imageResponse.feedback}</p>
+                      </div>
+                    )}
+
+                    {/* Suggestions */}
+                    {imageResponse.suggestions && imageResponse.suggestions.length > 0 && (
+                      <div className="bg-green-50 border border-green-200 rounded-2xl p-5 shadow-sm">
+                        <h3 className="font-semibold text-base mb-3 text-green-900">💡 Improvement Suggestions</h3>
                         <ul className="space-y-2">
                           {imageResponse.suggestions.map((suggestion: string, index: number) => (
-                            <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
-                              <span className="text-blue-500 mt-0.5">•</span>
+                            <li key={index} className="flex items-start gap-2 text-sm text-green-800">
+                              <span className="text-green-500 mt-0.5">•</span>
                               <span>{suggestion}</span>
                             </li>
                           ))}
