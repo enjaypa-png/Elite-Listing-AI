@@ -4,7 +4,7 @@ import { useState } from 'react';
 import ListingOptimizerResults from './listing-optimizer-results';
 
 export default function TestOptimize() {
-  const [activeTab, setActiveTab] = useState<'optimize' | 'image'>('optimize');
+  const [activeTab, setActiveTab] = useState<'optimize' | 'image' | 'keywords'>('optimize');
   
   // Listing Optimizer State
   const [platform, setPlatform] = useState('etsy');
@@ -22,6 +22,15 @@ export default function TestOptimize() {
   const [imageLoading, setImageLoading] = useState(false);
   const [imageResponse, setImageResponse] = useState<any>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  // Keyword Generation State
+  const [keywordTitle, setKeywordTitle] = useState('');
+  const [keywordDescription, setKeywordDescription] = useState('');
+  const [keywordCategory, setKeywordCategory] = useState('');
+  const [keywordPlatform, setKeywordPlatform] = useState('Etsy');
+  const [keywordLoading, setKeywordLoading] = useState(false);
+  const [keywordResponse, setKeywordResponse] = useState<any>(null);
+  const [keywordError, setKeywordError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +104,40 @@ export default function TestOptimize() {
     }
   };
 
+  const handleKeywordGeneration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setKeywordLoading(true);
+    setKeywordError(null);
+    setKeywordResponse(null);
+
+    try {
+      const res = await fetch('/api/keywords/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: keywordTitle,
+          description: keywordDescription,
+          category: keywordCategory || undefined,
+          platform: keywordPlatform,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to generate keywords');
+      }
+
+      setKeywordResponse(data);
+    } catch (err: any) {
+      setKeywordError(err.message);
+    } finally {
+      setKeywordLoading(false);
+    }
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-blue-600';
     if (score >= 60) return 'text-gray-600';
@@ -141,6 +184,16 @@ export default function TestOptimize() {
             >
               🖼️ Image Analysis
             </button>
+            <button
+              onClick={() => setActiveTab('keywords')}
+              className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                activeTab === 'keywords'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              🔑 Keyword Generator
+            </button>
           </div>
         </div>
 
@@ -149,7 +202,7 @@ export default function TestOptimize() {
           {/* Left Panel - Input Form */}
           <div className="bg-gray-50 rounded-3xl p-8">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-              {activeTab === 'optimize' ? 'Input Form' : 'Image Analysis'}
+              {activeTab === 'optimize' ? 'Input Form' : activeTab === 'image' ? 'Image Analysis' : 'Keyword Generation'}
             </h2>
 
             {activeTab === 'optimize' ? (
@@ -237,7 +290,7 @@ export default function TestOptimize() {
                   {loading ? 'Optimizing...' : 'Optimize Listing'}
                 </button>
               </form>
-            ) : (
+            ) : activeTab === 'image' ? (
               <form onSubmit={handleImageAnalysis} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">
@@ -291,13 +344,80 @@ export default function TestOptimize() {
                   {imageLoading ? 'Analyzing...' : 'Analyze Image'}
                 </button>
               </form>
+            ) : (
+              <form onSubmit={handleKeywordGeneration} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Platform
+                  </label>
+                  <select
+                    value={keywordPlatform}
+                    onChange={(e) => setKeywordPlatform(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900"
+                    required
+                  >
+                    <option value="Etsy">Etsy</option>
+                    <option value="Shopify">Shopify</option>
+                    <option value="eBay">eBay</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Product Title
+                  </label>
+                  <input
+                    type="text"
+                    value={keywordTitle}
+                    onChange={(e) => setKeywordTitle(e.target.value)}
+                    placeholder="Handmade Ceramic Coffee Mug..."
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Product Description
+                  </label>
+                  <textarea
+                    value={keywordDescription}
+                    onChange={(e) => setKeywordDescription(e.target.value)}
+                    placeholder="Describe your product in detail..."
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-gray-900 placeholder-gray-400"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
+                    Category (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={keywordCategory}
+                    onChange={(e) => setKeywordCategory(e.target.value)}
+                    placeholder="e.g., Home & Living, Jewelry, Art"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={keywordLoading}
+                  className="w-full py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                  {keywordLoading ? 'Generating Keywords...' : 'Generate Keywords'}
+                </button>
+              </form>
             )}
           </div>
 
           {/* Right Panel - Results */}
           <div className="bg-gray-50 rounded-3xl p-8">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-              {activeTab === 'optimize' ? 'Results' : 'Analysis Results'}
+              {activeTab === 'optimize' ? 'Results' : activeTab === 'image' ? 'Analysis Results' : 'Generated Keywords'}
             </h2>
 
             {activeTab === 'optimize' ? (
@@ -323,7 +443,7 @@ export default function TestOptimize() {
                   />
                 )}
               </>
-            ) : (
+            ) : activeTab === 'image' ? (
               <>
                 {imageError && (
                   <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-4">
@@ -520,6 +640,141 @@ export default function TestOptimize() {
                       </summary>
                       <pre className="mt-4 text-xs bg-gray-50 p-4 rounded-xl overflow-auto max-h-64 text-gray-700">
                         {JSON.stringify(imageResponse, null, 2)}
+                      </pre>
+                    </details>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {keywordError && (
+                  <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-4">
+                    <strong>Error:</strong> {keywordError}
+                  </div>
+                )}
+
+                {!keywordResponse && !keywordError && (
+                  <div className="text-center py-20 text-gray-400">
+                    <div className="text-6xl mb-4">🔑</div>
+                    <p className="text-sm">Fill out the form to generate keywords</p>
+                  </div>
+                )}
+
+                {keywordResponse && keywordResponse.ok && (
+                  <div className="space-y-5">
+                    {/* Summary Stats */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-sm border border-blue-100">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">{keywordResponse.totalKeywords}</div>
+                          <div className="text-xs text-gray-600">Total Keywords</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">{keywordResponse.averageRelevance}</div>
+                          <div className="text-xs text-gray-600">Avg Relevance</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600 capitalize">{keywordResponse.topIntent}</div>
+                          <div className="text-xs text-gray-600">Top Intent</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Suggestions */}
+                    {keywordResponse.suggestions && keywordResponse.suggestions.length > 0 && (
+                      <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
+                        <h3 className="font-semibold text-sm mb-2 text-gray-900 flex items-center gap-2">
+                          💡 Suggestions
+                        </h3>
+                        <ul className="space-y-1">
+                          {keywordResponse.suggestions.map((suggestion: string, index: number) => (
+                            <li key={index} className="text-sm text-gray-700">• {suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Primary Keywords */}
+                    <div className="bg-white rounded-2xl p-5 shadow-sm">
+                      <h3 className="font-semibold text-base mb-4 text-gray-900">Primary Keywords ({keywordResponse.primaryKeywords.length})</h3>
+                      <div className="space-y-3">
+                        {keywordResponse.primaryKeywords.map((kw: any, index: number) => (
+                          <div key={index} className="border border-gray-200 rounded-xl p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">{kw.keyword}</div>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-lg capitalize">{kw.intent}</span>
+                                  <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-lg capitalize">{kw.competition}</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-blue-600">{kw.keywordScore}</div>
+                                <div className="text-xs text-gray-500">Score</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
+                              <div>
+                                <div className="text-gray-500">Volume</div>
+                                <div className="font-semibold text-gray-900">{kw.searchVolume}</div>
+                              </div>
+                              <div>
+                                <div className="text-gray-500">CTR Potential</div>
+                                <div className="font-semibold text-gray-900">{kw.ctrPotential}%</div>
+                              </div>
+                              <div>
+                                <div className="text-gray-500">Relevance</div>
+                                <div className="font-semibold text-gray-900">{kw.relevanceScore}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Secondary Keywords */}
+                    <div className="bg-white rounded-2xl p-5 shadow-sm">
+                      <h3 className="font-semibold text-base mb-4 text-gray-900">Secondary Keywords ({keywordResponse.secondaryKeywords.length})</h3>
+                      <div className="space-y-3">
+                        {keywordResponse.secondaryKeywords.map((kw: any, index: number) => (
+                          <div key={index} className="border border-gray-200 rounded-xl p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">{kw.keyword}</div>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-lg capitalize">{kw.intent}</span>
+                                  <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-lg capitalize">{kw.competition}</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-blue-600">{kw.keywordScore}</div>
+                                <div className="text-xs text-gray-500">Score</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
+                              <div>
+                                <div className="text-gray-500">Volume</div>
+                                <div className="font-semibold text-gray-900">{kw.searchVolume}</div>
+                              </div>
+                              <div>
+                                <div className="text-gray-500">CTR Potential</div>
+                                <div className="font-semibold text-gray-900">{kw.ctrPotential}%</div>
+                              </div>
+                              <div>
+                                <div className="text-gray-500">Relevance</div>
+                                <div className="font-semibold text-gray-900">{kw.relevanceScore}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Raw JSON */}
+                    <details className="bg-white rounded-2xl p-5 shadow-sm">
+                      <summary className="cursor-pointer font-semibold text-sm text-gray-700">View Raw JSON</summary>
+                      <pre className="mt-4 text-xs bg-gray-50 p-4 rounded-xl overflow-auto max-h-64 text-gray-700">
+                        {JSON.stringify(keywordResponse, null, 2)}
                       </pre>
                     </details>
                   </div>
