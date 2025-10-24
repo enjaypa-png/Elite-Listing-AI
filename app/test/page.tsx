@@ -69,7 +69,7 @@ export default function TestOptimize() {
     setImageResponse(null);
 
     try {
-      const res = await fetch('/api/image/analyze', {
+      const res = await fetch('/api/optimize/image/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
