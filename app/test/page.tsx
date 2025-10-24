@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ListingOptimizerResults from './listing-optimizer-results';
 
 export default function TestOptimize() {
   const [activeTab, setActiveTab] = useState<'optimize' | 'image'>('optimize');
@@ -315,65 +316,11 @@ export default function TestOptimize() {
                 )}
 
                 {response && response.ok && (
-                  <div className="space-y-5">
-                    <div className="bg-white rounded-2xl p-5 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-base font-medium text-gray-700">Overall Health Score</span>
-                        <span className={`text-3xl font-semibold ${getScoreColor(response.healthScore)}`}>
-                          {response.healthScore}
-                        </span>
-                      </div>
-                    </div>
-
-                    {response.variants?.map((variant: any, index: number) => (
-                      <div
-                        key={index}
-                        className="bg-white rounded-2xl p-5 shadow-sm"
-                      >
-                        <h3 className="font-semibold text-lg mb-4 text-gray-900">
-                          Variant {index + 1}
-                        </h3>
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Title</p>
-                            <p className="text-sm text-gray-900">{variant.title}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Description</p>
-                            <p className="text-sm text-gray-700">{variant.description}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-500 mb-1">Tags</p>
-                            <div className="flex flex-wrap gap-2">
-                              {variant.tags?.map((tag: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                            <span className="text-xs font-medium text-gray-500">Copy Score</span>
-                            <span className={`font-semibold ${getScoreColor(variant.copyScore)}`}>
-                              {variant.copyScore}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <details className="bg-white rounded-2xl p-5 shadow-sm">
-                      <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
-                        View Raw JSON
-                      </summary>
-                      <pre className="mt-4 text-xs bg-gray-50 p-4 rounded-xl overflow-auto max-h-64 text-gray-700">
-                        {JSON.stringify(response, null, 2)}
-                      </pre>
-                    </details>
-                  </div>
+                  <ListingOptimizerResults 
+                    response={response} 
+                    getScoreColor={getScoreColor}
+                    getScoreBgColor={getScoreBgColor}
+                  />
                 )}
               </>
             ) : (
