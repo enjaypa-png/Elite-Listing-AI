@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { prisma } from '@/lib/prisma';
 
 // Validate OpenAI API key
 if (!process.env.OPENAI_API_KEY) {
@@ -16,6 +17,9 @@ const openai = new OpenAI({
 const AnalyzeImageRequestSchema = z.object({
   imageUrl: z.string().url('Image URL must be a valid URL'),
   platform: z.string().min(1, 'Platform is required').default('etsy'),
+  listingId: z.string().optional(),
+  userId: z.string().optional(),
+  saveToDatabase: z.boolean().default(false),
 });
 
 // Platform-specific requirements
@@ -168,6 +172,39 @@ Provide your analysis in this exact JSON format:
     const overallScore = Math.round(technicalScore + algorithmScore + visualScore + conversionScore);
 
     console.log(`[${requestId}] Enhanced image analysis complete. Overall score: ${overallScore}/100`);
+
+    // Save to database if requested and listingId provided
+    if (validatedInput.saveToDatabase && validatedInput.listingId) {
+      try {
+        await prisma.photoScore.create({
+          data: {
+            listingId: validatedInput.listingId,
+            imageUrl: imageUrl,
+            overallScore: overallScore,
+            compositionScore: aiResponse.composition,
+            lightingScore: aiResponse.lighting,
+            clarityScore: aiResponse.clarity,
+            backgroundScore: aiResponse.backgroundQuality || 0,
+            analysis: {
+              technicalCompliance: aiResponse.technicalCompliance || 0,
+              algorithmFit: aiResponse.algorithmFit || 0,
+              productDominance: aiResponse.productDominance || 0,
+              colorBalance: aiResponse.colorBalance || 0,
+              appeal: aiResponse.appeal,
+              estimatedResolution: aiResponse.estimatedResolution || 'unknown',
+              aspectRatioEstimate: aiResponse.aspectRatioEstimate || 'unknown',
+              feedback: aiResponse.feedback,
+              complianceIssues: aiResponse.complianceIssues || [],
+            },
+            suggestions: aiResponse.suggestions || [],
+          },
+        });
+        console.log(`[${requestId}] PhotoScore saved to database`);
+      } catch (dbError) {
+        console.error(`[${requestId}] Failed to save to database:`, dbError);
+        // Don't fail the request if database save fails
+      }
+    }
 
     return NextResponse.json({
       ok: true,
